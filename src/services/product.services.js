@@ -1,3 +1,4 @@
+const res = require("express/lib/response");
 const { Op } = require("sequelize");
 const { Products, Users, ProductsInCart, Carts, Order } = require("../models");
 
@@ -60,17 +61,31 @@ class ProductService {
       throw err;
     }
   }
-  static async buyProduct(productId, cartId, status) {
+  static async buyProduct(productId, status, userId) {
     try {
-      await ProductsInCart.update(
-        { status: status },
-        {
-          where: {
-            [Op.and]: [{ productId }, { cartId }],
-          },
-        }
-      );
-      return [];
+      const userCart = await Carts.findOne({ where: { userId } });
+      const product = await ProductsInCart.findOne({
+        where: {
+          [Op.and]: [{ productId }, { cartId: userCart.id }],
+        },
+      });
+      if (product) {
+        await ProductsInCart.update(
+          { status: status },
+          { where: { id: product.id } }
+        );
+        return true;
+      } else {
+        return false;
+      }
+      // await ProductsInCart.update(
+      //   { status: status },
+      //   {
+      //     where: {
+      //       [Op.and]: [{ productId }, { cartId: userCart.id }],
+      //     },
+      //   }
+      // );
     } catch (err) {
       throw err;
     }

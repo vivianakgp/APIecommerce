@@ -47,7 +47,11 @@ const getProductOfUser = async (req, res, next) => {
     const { id } = cart;
     //console.log(id);
     const result = await ProductService.getProductInCart(id);
-    res.json(result);
+    if (result.length > 0) {
+      res.json(result);
+    } else {
+      res.json({ mng: "no products added to your cart" });
+    }
   } catch (err) {
     next({
       status: 400,
@@ -59,10 +63,12 @@ const getProductOfUser = async (req, res, next) => {
 
 const buyProductInCart = async (req, res, next) => {
   try {
-    const { productId } = req.params;
-    const { cartId, status } = req.body;
-    await ProductService.buyProduct(productId, cartId, status);
-    res.json({ status: "purchased" });
+    const { userId } = req.params;
+    const { status, productId } = req.body;
+    const result = await ProductService.buyProduct(productId, status, userId);
+    result
+      ? res.json({ status: "Product purchased" })
+      : res.status(401).json({ mng: "product no found" });
   } catch (err) {
     next({
       status: 400,
@@ -76,7 +82,12 @@ const getUserOrders = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const result = await ProductService.getOrdersByUserId(userId);
-    res.json(result);
+    console.log(result.length);
+    if (result.length > 0) {
+      res.json(result);
+    } else {
+      res.json({ mng: "No orders yet" });
+    }
   } catch (err) {
     next({
       status: 400,
