@@ -15,8 +15,8 @@ class UserService {
   }
   static async createUser(data) {
     try {
-      await Users.create(data);
-      return true;
+      const result = await Users.create(data);
+      return result;
     } catch (err) {
       throw err;
     }

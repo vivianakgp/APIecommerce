@@ -1,5 +1,6 @@
 const app = require("./app");
 const db = require("../src/utils/database");
+const transporter = require("./utils/mailer");
 require("dotenv").config();
 const PORT = process.env.PORT;
 
@@ -17,7 +18,9 @@ db.sync({ alter: true })
     console.log("creating tables that did not exist");
   })
   .catch((err) => console.log(`Syncronia error: ${err}`));
-
+transporter.verify().then(() => {
+  console.log("--- nodemailer starting ---");
+});
 app.listen(PORT, () => {
   console.log(`express server is running on port ${PORT}`);
 });

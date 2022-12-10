@@ -1,6 +1,8 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const UserService = require("../services/user.services");
+const transporter = require("../utils/mailer");
+const welcomeTemplete = require("../templates/welcome");
 
 const authUser = async (req, res, next) => {
   try {
@@ -27,8 +29,15 @@ const authUser = async (req, res, next) => {
 const createUser = async (req, res, next) => {
   try {
     const data = req.body;
-    await UserService.createUser(data);
+    const result = await UserService.createUser(data);
     res.status(201).json({ msg: "sussesful created user" });
+    transporter.sendMail({
+      from: "<vivianakgp@gmail.com>",
+      to: result.email,
+      subject: "Welcome to the best e-commerce ever =)",
+      text: `Hello ${result.userName}`,
+      html: welcomeTemplete(result.userName),
+    });
   } catch (err) {
     next({
       status: 400,
